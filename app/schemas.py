@@ -78,3 +78,41 @@ class ErrorResponse(BaseModel):
     """Standard error response."""
     error: str
     available_foods: Optional[List[str]] = None
+
+
+# ── AI (Ollama) Recommendation Schemas ──
+
+class AIRecommendRequest(BaseModel):
+    """Request body for the /recommend-ai endpoint (natural language)."""
+    query: str = Field(
+        ...,
+        description="Natural language description of what you want to eat",
+        json_schema_extra={"example": "I want something spicy with chicken, maybe Indian food"}
+    )
+    num_recommendations: int = Field(
+        default=5, ge=1, le=20,
+        description="Number of recommendations to return"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "query": "I'm craving something spicy with chicken",
+                    "num_recommendations": 5
+                }
+            ]
+        }
+    }
+
+
+class AIRecommendResponse(BaseModel):
+    """Response body for the /recommend-ai endpoint."""
+    user_query: str = Field(..., description="The original natural language query")
+    extracted_food: str = Field(..., description="Food name extracted by the LLM")
+    llm_model: str = Field(..., description="Which LLM model was used")
+    num_results: int = Field(..., description="Number of recommendations returned")
+    recommendations: List[FoodItem] = Field(
+        ..., description="List of recommended food items"
+    )
+

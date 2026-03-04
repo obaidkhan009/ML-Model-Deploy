@@ -4,14 +4,16 @@ Food Recommendation API — FastAPI Application
 Production-ready REST API for serving food recommendations.
 
 Endpoints:
-    GET  /          → Welcome message
-    GET  /health    → Liveness probe (for Kubernetes)
-    GET  /foods     → List all available foods
-    POST /recommend → Get food recommendations
-    GET  /metrics   → Prometheus metrics (auto-generated)
+    GET  /             → Welcome message
+    GET  /health       → Liveness probe (for Kubernetes)
+    GET  /foods        → List all available foods
+    POST /recommend    → Get food recommendations (by food name)
+    POST /recommend-ai → Get food recommendations (natural language via Ollama LLM)
+    GET  /metrics      → Prometheus metrics (auto-generated)
 
 Architecture:
     Client → AWS Load Balancer → K8s Service → This API → Pre-loaded Model (.pkl)
+                                                        → Ollama LLM (natural language)
                                                         → PostgreSQL (logs & analytics)
 """
 
@@ -26,7 +28,10 @@ from app.schemas import (
     HealthResponse,
     FoodListResponse,
     ErrorResponse,
+    AIRecommendRequest,
+    AIRecommendResponse,
 )
+from app.llm_service import extract_food_from_query, check_ollama_health, OLLAMA_MODEL
 from app.recommender import FoodRecommender
 
 
@@ -36,11 +41,11 @@ from app.recommender import FoodRecommender
 app = FastAPI(
     title="🍽️ Food Recommendation API",
     description=(
-        "A Content-Based Filtering recommendation engine that suggests similar foods "
-        "based on cuisine, ingredients, spice level, and dietary type. "
-        "Built with Scikit-learn (TF-IDF + Cosine Similarity) and deployed on AWS EKS."
+        "A Content-Based Filtering recommendation engine with AI-powered natural language search. "
+        "Uses Scikit-learn (TF-IDF + Cosine Similarity) for recommendations and "
+        "Ollama LLM for understanding natural language food queries. Deployed on AWS EKS."
     ),
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/docs",       # Swagger UI
     redoc_url="/redoc",      # ReDoc UI
 )
@@ -89,10 +94,15 @@ def root():
     """Welcome endpoint."""
     return {
         "service": "Food Recommendation API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "database": "connected" if db_available else "not configured",
-        "docs": "/docs",
-        "health": "/health",
+        "ollama_model": OLLAMA_MODEL,
+        "endpoints": {
+            "docs": "/docs",
+            "health": "/health",
+            "recommend": "POST /recommend (by food name)",
+            "recommend_ai": "POST /recommend-ai (natural language)",
+        },
     }
 
 
@@ -192,3 +202,77 @@ def get_recommendations(request: RecommendRequest, req: Request = None):
         num_results=len(recommendations),
         recommendations=recommendations,
     )
+
+
+# ──────────────────────────────────────────────
+# AI-Powered Recommendation (Ollama LLM)
+# ──────────────────────────────────────────────
+
+@app.post(
+    "/recommend-ai",
+    response_model=AIRecommendResponse,
+    responses={503: {"model": ErrorResponse}},
+    tags=["AI Recommendations"],
+)
+async def get_ai_recommendations(request: AIRecommendRequest):
+    """
+    Get food recommendations using natural language (powered by Ollama LLM).
+
+    **How it works:**
+    1. You describe what you want in plain English
+    2. Ollama LLM extracts the best matching food name
+    3. Our ML model finds similar foods using Cosine Similarity
+    4. Returns recommendations based on the LLM's understanding
+
+    **Example request:**
+    ```json
+    {
+        "query": "I want something spicy with chicken, maybe Indian food",
+        "num_recommendations": 5
+    }
+    ```
+    """
+    if not recommender.is_loaded:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
+    # Step 1: Use Ollama to extract a food name from natural language
+    extracted_food = await extract_food_from_query(
+        user_query=request.query,
+        available_foods=recommender.get_all_food_names(),
+    )
+
+    if not extracted_food:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "Ollama LLM is not available. Make sure Ollama is running.",
+                "hint": "Run: ollama serve",
+            }
+        )
+
+    # Step 2: Find the closest matching food name
+    if not recommender.food_exists(extracted_food):
+        # LLM returned something not in our list — find closest match
+        all_foods = recommender.get_all_food_names()
+        closest = min(
+            all_foods,
+            key=lambda f: abs(len(f) - len(extracted_food))
+        )
+        extracted_food = closest
+
+    # Step 3: Get recommendations using the existing ML model
+    results = recommender.get_recommendations(
+        food_name=extracted_food,
+        n=request.num_recommendations,
+    )
+
+    recommendations = [FoodItem(**item) for item in results]
+
+    return AIRecommendResponse(
+        user_query=request.query,
+        extracted_food=extracted_food,
+        llm_model=OLLAMA_MODEL,
+        num_results=len(recommendations),
+        recommendations=recommendations,
+    )
+
