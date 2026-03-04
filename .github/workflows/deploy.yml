@@ -1,0 +1,113 @@
+# ==========================================
+# CI/CD Pipeline — GitHub Actions
+# ==========================================
+# Triggers on push to main branch:
+# 1. Builds Docker image
+# 2. Pushes to AWS ECR
+# 3. Deploys to AWS EKS
+#
+# Required GitHub Secrets (set in repo Settings → Secrets):
+#   AWS_ACCESS_KEY_ID      — IAM user access key
+#   AWS_SECRET_ACCESS_KEY  — IAM user secret key
+#   AWS_REGION             — e.g., us-east-1
+#   AWS_ACCOUNT_ID         — Your 12-digit AWS account ID
+#   EKS_CLUSTER_NAME       — Name of your EKS cluster
+# ==========================================
+
+name: Build & Deploy to EKS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  ECR_REPOSITORY: food-recommender
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  # ── Job 1: Build & Push Docker Image ──
+  build-and-push:
+    name: Build & Push to ECR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
+          docker tag ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
+                     ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+      - name: Push to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+  # ── Job 2: Deploy to EKS ──
+  deploy:
+    name: Deploy to EKS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'   # Only deploy from main branch
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy with kubectl
+        run: |
+          # Update the image tag in deployment
+          export IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+          
+          # Replace placeholder in deployment.yaml
+          sed -i "s|<AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/food-recommender:latest|${IMAGE_URI}|g" k8s/deployment.yaml
+          
+          # Apply all manifests
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/hpa.yaml
+          kubectl apply -f k8s/ingress.yaml
+          
+          # Wait for rollout to complete
+          kubectl rollout status deployment/food-recommender -n ml-serving --timeout=120s
+
+      - name: Verify deployment
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -n ml-serving
+          echo ""
+          echo "=== Services ==="
+          kubectl get svc -n ml-serving
+          echo ""
+          echo "=== HPA ==="
+          kubectl get hpa -n ml-serving
+          echo ""
+          echo "=== Ingress ==="
+          kubectl get ingress -n ml-serving

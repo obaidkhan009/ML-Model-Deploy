@@ -1,0 +1,98 @@
+# ==========================================
+# Deployment — Runs the API Pods
+# ==========================================
+# This is the CORE of your Kubernetes deployment.
+# It tells K8s: "I want 2 copies of my API running at all times."
+#
+# If a pod crashes → K8s automatically restarts it
+# If a node fails → K8s moves the pod to a healthy node
+# If you push a new image → K8s does a rolling update (zero downtime)
+#
+# Key concepts your manager might ask about:
+# - replicas: How many copies of the API to run
+# - resources: CPU/memory limits to prevent one pod from eating all resources
+# - probes: Health checks that K8s uses to know if your app is alive
+# ==========================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: food-recommender
+  namespace: ml-serving
+  labels:
+    app: food-recommender
+    version: v1
+spec:
+  # Number of pod replicas — HPA will override this dynamically
+  replicas: 2
+  
+  # How to find pods that belong to this deployment
+  selector:
+    matchLabels:
+      app: food-recommender
+  
+  # Rolling update strategy — zero-downtime deployments
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # At most 1 extra pod during update
+      maxUnavailable: 0   # Never have fewer than 'replicas' running
+  
+  template:
+    metadata:
+      labels:
+        app: food-recommender
+        version: v1
+      annotations:
+        # Tell Prometheus to scrape this pod's /metrics endpoint
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: food-recommender
+          # REPLACE with your ECR image URI after pushing
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/food-recommender:latest
+          
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          
+          # ── Resource Management ──
+          # requests: guaranteed minimum resources
+          # limits: maximum resources a pod can use
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"       # 0.25 CPU core
+            limits:
+              memory: "256Mi"
+              cpu: "500m"       # 0.5 CPU core
+          
+          # ── Liveness Probe ──
+          # "Is the app alive?"
+          # If this fails 3 times → K8s kills and restarts the pod
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15   # Wait 15s before first check
+            periodSeconds: 10         # Check every 10s
+            failureThreshold: 3       # 3 failures = restart
+          
+          # ── Readiness Probe ──
+          # "Is the app ready to receive traffic?"
+          # If this fails → K8s stops sending traffic to this pod
+          # (but does NOT restart it)
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 2
+          
+          # ── Environment Variables (loaded from ConfigMap) ──
+          envFrom:
+            - configMapRef:
+                name: food-recommender-config

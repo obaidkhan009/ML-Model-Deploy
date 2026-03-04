@@ -1,0 +1,54 @@
+# ==========================================
+# Ingress — External Traffic Entry Point
+# ==========================================
+# Routes external internet traffic to your Service.
+#
+# Flow: User → Internet → AWS ALB (created by this Ingress) → Service → Pods
+#
+# The AWS Load Balancer Controller creates an actual AWS ALB
+# based on this Ingress configuration.
+#
+# Prerequisites:
+# 1. Install AWS Load Balancer Controller in your EKS cluster
+#    https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
+# 2. Your subnets must be tagged for ALB auto-discovery
+# ==========================================
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: food-recommender-ingress
+  namespace: ml-serving
+  labels:
+    app: food-recommender
+  annotations:
+    # Use AWS ALB (Application Load Balancer) as the ingress controller
+    kubernetes.io/ingress.class: alb
+    
+    # internet-facing = accessible from the internet
+    # internal = only accessible within your VPC
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    
+    # Target type: IP mode routes directly to pod IPs (faster)
+    alb.ingress.kubernetes.io/target-type: ip
+    
+    # Health check configuration
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    
+    # Optional: Enable HTTPS (uncomment and add your certificate ARN)
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:REGION:ACCOUNT:certificate/CERT-ID
+    
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: food-recommender
+                port:
+                  number: 80

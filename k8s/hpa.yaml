@@ -1,0 +1,58 @@
+# ==========================================
+# Horizontal Pod Autoscaler (HPA)
+# ==========================================
+# Automatically scales pods based on CPU usage.
+#
+# How it works:
+# 1. HPA monitors average CPU across all pods
+# 2. If average CPU > 70% → adds more pods (up to maxReplicas)
+# 3. If average CPU < 70% → removes pods (down to minReplicas)
+# 4. Checks every 30 seconds by default
+#
+# Example scenario:
+#   - Normal traffic: 2 pods running at 30% CPU each
+#   - Lunch rush: CPU spikes to 85% → HPA adds pods → 4 pods at 42% each
+#   - Late night: CPU drops to 15% → HPA removes pods → back to 2 pods
+#
+# Prerequisite: metrics-server must be installed in the cluster
+#   kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+# ==========================================
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: food-recommender-hpa
+  namespace: ml-serving
+  labels:
+    app: food-recommender
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: food-recommender
+  
+  minReplicas: 2     # Always keep at least 2 pods (high availability)
+  maxReplicas: 10    # Never exceed 10 pods (cost control)
+  
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70    # Scale up when CPU > 70%
+  
+  # Scaling behavior — prevent thrashing (rapid scale up/down)
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60    # Wait 60s before scaling up again
+      policies:
+        - type: Pods
+          value: 2                       # Add at most 2 pods at a time
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300   # Wait 5 min before scaling down
+      policies:
+        - type: Pods
+          value: 1                       # Remove at most 1 pod at a time
+          periodSeconds: 120

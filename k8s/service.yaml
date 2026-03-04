@@ -1,0 +1,34 @@
+# ==========================================
+# Service — Internal Load Balancer
+# ==========================================
+# A Service gives your pods a stable network address.
+#
+# Without a Service:
+#   Pod IPs change every time they restart → clients can't find them
+#
+# With a Service:
+#   Clients connect to "food-recommender:80" → Service routes to healthy pods
+#   If Pod 1 is busy, traffic goes to Pod 2 (round-robin load balancing)
+#
+# Type: ClusterIP (internal only) — the Ingress handles external traffic
+# ==========================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: food-recommender
+  namespace: ml-serving
+  labels:
+    app: food-recommender
+spec:
+  type: ClusterIP
+  
+  # Which pods does this Service route to?
+  selector:
+    app: food-recommender
+  
+  ports:
+    - name: http
+      port: 80             # Port the Service listens on
+      targetPort: 8000     # Port the container listens on
+      protocol: TCP

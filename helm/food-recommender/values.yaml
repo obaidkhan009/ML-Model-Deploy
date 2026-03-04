@@ -1,0 +1,65 @@
+# ==========================================
+# Helm Values — Configuration for the chart
+# ==========================================
+# Override these values for different environments:
+#   helm install food-recommender ./helm/food-recommender -f values-staging.yaml
+#   helm install food-recommender ./helm/food-recommender -f values-production.yaml
+
+# ── Application Settings ──
+replicaCount: 2
+
+image:
+  repository: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/food-recommender
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# ── Service Settings ──
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+# ── Resource Limits ──
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "250m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+
+# ── Autoscaling (HPA) ──
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+# ── Health Probes ──
+probes:
+  liveness:
+    path: /health
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  readiness:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# ── Ingress ──
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+
+# ── Namespace ──
+namespace: ml-serving
+
+# ── Environment Variables ──
+env:
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"

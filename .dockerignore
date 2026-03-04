@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+dist
+build
+*.egg
+
+# Virtual environment
+venv
+.venv
+env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Kubernetes & Helm
+k8s/
+helm/
+
+# CI/CD
+.github/
+
+# Scripts
+scripts/
+
+# Docs
+README.md
+*.md
+!app/**/*.md
+
+# Training script (not needed in production image)
+train_model.py

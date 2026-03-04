@@ -1,0 +1,12 @@
+# ==========================================
+# Namespace — isolates our ML workloads
+# ==========================================
+# Why: Keeps ML services separate from other apps in the cluster.
+# Like having a separate room for your ML team in an office building.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ml-serving
+  labels:
+    app: food-recommender
+    environment: production

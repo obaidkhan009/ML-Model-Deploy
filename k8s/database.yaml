@@ -1,0 +1,63 @@
+# Kubernetes ConfigMap for Database URL
+# Used to configure the API pods to connect to PostgreSQL
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: food-recommender-config
+  namespace: ml-serving
+data:
+  DATABASE_URL: "postgresql://postgres:postgres@food-recommender-db:5432/food_recommender"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"
+
+---
+# PostgreSQL Deployment for Kubernetes
+# In production, you'd use AWS RDS instead. But for learning, we run PostgreSQL in K8s.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: food-recommender-db
+  namespace: ml-serving
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: food-recommender-db
+  template:
+    metadata:
+      labels:
+        app: food-recommender-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+            - name: POSTGRES_DB
+              value: "food_recommender"
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-storage
+      volumes:
+        - name: postgres-storage
+          emptyDir: {}    # For learning. In production, use a PersistentVolumeClaim
+
+---
+# PostgreSQL Service — allows the API pods to find the database
+apiVersion: v1
+kind: Service
+metadata:
+  name: food-recommender-db
+  namespace: ml-serving
+spec:
+  type: ClusterIP
+  selector:
+    app: food-recommender-db
+  ports:
+    - port: 5432
+      targetPort: 5432

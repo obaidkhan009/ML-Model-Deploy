@@ -1,0 +1,11 @@
+# Food Recommendation API — ML Model Deploy
+*.pyc
+__pycache__/
+model/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.DS_Store
+.env

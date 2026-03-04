@@ -1,0 +1,51 @@
+name,cuisine,ingredients,spice_level,diet_type,rating,description
+Butter Chicken,Indian,chicken cream butter tomato garam_masala fenugreek ginger garlic,medium,non-veg,4.8,Creamy tomato-based curry with tender chicken pieces
+Chicken Tikka Masala,Indian,chicken yogurt tomato cream tikka_spice ginger garlic onion,medium,non-veg,4.7,Grilled chicken chunks in spiced creamy tomato sauce
+Palak Paneer,Indian,paneer spinach cream onion cumin garam_masala garlic ginger,mild,vegetarian,4.5,Cottage cheese cubes in creamy spinach gravy
+Chicken Biryani,Indian,chicken basmati_rice saffron cardamom cinnamon bay_leaf onion yogurt,medium,non-veg,4.9,Fragrant layered rice dish with spiced chicken
+Vegetable Biryani,Indian,mixed_vegetables basmati_rice saffron cardamom cinnamon bay_leaf onion,mild,vegetarian,4.4,Fragrant layered rice with seasonal vegetables
+Dal Makhani,Indian,black_lentils kidney_beans butter cream tomato garlic ginger cumin,mild,vegetarian,4.6,Slow-cooked creamy black lentil curry
+Tandoori Chicken,Indian,chicken yogurt tandoori_spice lemon ginger garlic paprika,hot,non-veg,4.7,Charcoal-grilled spiced chicken marinated in yogurt
+Chole Bhature,Indian,chickpeas onion tomato ginger garlic cumin coriander flour,medium,vegetarian,4.5,Spiced chickpea curry with deep-fried bread
+Fish Curry,Indian,fish coconut_milk tomato curry_leaves mustard_seed turmeric tamarind,medium,non-veg,4.3,Tangy and spicy fish in coconut-based curry
+Aloo Gobi,Indian,potato cauliflower turmeric cumin coriander onion tomato ginger,mild,vegan,4.2,Dry-roasted potato and cauliflower with Indian spices
+Pad Thai,Thai,rice_noodles shrimp peanuts bean_sprouts egg tamarind fish_sauce lime,mild,non-veg,4.6,Stir-fried rice noodles with shrimp and tangy sauce
+Green Curry,Thai,chicken coconut_milk green_curry_paste basil bamboo_shoots eggplant,hot,non-veg,4.5,Aromatic green curry with coconut milk and vegetables
+Tom Yum Soup,Thai,shrimp lemongrass galangal lime_leaves chili mushroom fish_sauce,hot,non-veg,4.4,Hot and sour Thai soup with aromatic herbs
+Som Tum,Thai,green_papaya tomato peanuts lime chili fish_sauce palm_sugar,hot,vegan,4.3,Spicy green papaya salad with lime dressing
+Massaman Curry,Thai,beef potato onion peanuts coconut_milk cinnamon cardamom tamarind,mild,non-veg,4.7,Rich and mild Thai curry with Persian influences
+Kung Pao Chicken,Chinese,chicken peanuts chili sichuan_pepper soy_sauce vinegar ginger garlic,hot,non-veg,4.5,Spicy stir-fried chicken with peanuts and peppers
+Sweet and Sour Pork,Chinese,pork pineapple bell_pepper onion vinegar sugar soy_sauce ketchup,mild,non-veg,4.3,Crispy pork in tangy-sweet sauce with vegetables
+Mapo Tofu,Chinese,tofu ground_pork sichuan_pepper chili_bean_paste soy_sauce garlic ginger,hot,vegetarian,4.4,Spicy Sichuan tofu dish with numbing peppers
+Fried Rice,Chinese,rice egg vegetables soy_sauce sesame_oil green_onion garlic,mild,vegetarian,4.2,Wok-fried rice with eggs and mixed vegetables
+Dim Sum Dumplings,Chinese,pork shrimp ginger soy_sauce sesame_oil wonton_wrapper green_onion,mild,non-veg,4.6,Steamed dumplings filled with savory pork and shrimp
+Margherita Pizza,Italian,mozzarella tomato_sauce basil olive_oil flour yeast,mild,vegetarian,4.7,Classic pizza with fresh mozzarella and basil
+Pasta Carbonara,Italian,spaghetti egg parmesan pancetta black_pepper olive_oil,mild,non-veg,4.6,Creamy pasta with egg sauce and crispy pancetta
+Lasagna,Italian,pasta ground_beef mozzarella ricotta tomato_sauce parmesan bechamel,mild,non-veg,4.8,Layered pasta with meat sauce and cheese
+Risotto,Italian,arborio_rice parmesan butter white_wine onion mushroom chicken_broth,mild,vegetarian,4.5,Creamy Italian rice dish cooked with mushrooms
+Bruschetta,Italian,bread tomato basil garlic olive_oil balsamic_vinegar,mild,vegan,4.3,Toasted bread topped with fresh tomato and basil
+Sushi Roll,Japanese,rice nori salmon avocado cucumber soy_sauce wasabi ginger,mild,non-veg,4.7,Fresh fish and vegetables wrapped in seasoned rice
+Ramen,Japanese,noodles pork_broth chashu egg nori green_onion soy_sauce miso,medium,non-veg,4.8,Rich broth noodle soup with sliced pork and toppings
+Tempura,Japanese,shrimp vegetables flour egg tempura_sauce dashi soy_sauce,mild,non-veg,4.4,Light and crispy battered shrimp and vegetables
+Teriyaki Chicken,Japanese,chicken soy_sauce mirin sugar ginger garlic sesame rice,mild,non-veg,4.5,Glazed grilled chicken with sweet soy sauce
+Miso Soup,Japanese,tofu wakame dashi miso_paste green_onion,mild,vegetarian,4.2,Light Japanese soup with tofu and seaweed
+Tacos Al Pastor,Mexican,pork pineapple onion cilantro achiote chili tortilla lime,medium,non-veg,4.7,Marinated pork tacos with pineapple and cilantro
+Burrito Bowl,Mexican,rice beans chicken guacamole salsa sour_cream cheese corn,medium,non-veg,4.5,Deconstructed burrito with all toppings in a bowl
+Enchiladas,Mexican,tortilla chicken cheese enchilada_sauce onion sour_cream jalapeno,medium,non-veg,4.4,Rolled tortillas filled with chicken in chili sauce
+Guacamole,Mexican,avocado tomato onion lime cilantro jalapeno salt,mild,vegan,4.6,Fresh smashed avocado dip with lime and cilantro
+Quesadilla,Mexican,tortilla cheese chicken bell_pepper onion sour_cream salsa,mild,non-veg,4.3,Grilled tortilla filled with melted cheese and chicken
+Beef Burger,American,beef_patty lettuce tomato onion cheese pickles bun ketchup mustard,mild,non-veg,4.5,Classic grilled beef burger with fresh toppings
+BBQ Ribs,American,pork_ribs bbq_sauce brown_sugar paprika garlic onion cayenne,medium,non-veg,4.7,Slow-smoked pork ribs glazed with tangy BBQ sauce
+Chicken Wings,American,chicken hot_sauce butter garlic celery blue_cheese,hot,non-veg,4.4,Crispy fried chicken wings with spicy buffalo sauce
+Caesar Salad,American,romaine_lettuce parmesan croutons caesar_dressing anchovy lemon,mild,non-veg,4.2,Classic salad with creamy Caesar dressing and croutons
+Mac and Cheese,American,macaroni cheddar butter milk flour breadcrumbs,mild,vegetarian,4.3,Creamy baked macaroni with melted cheddar cheese
+Falafel Wrap,Mediterranean,chickpeas tahini lettuce tomato onion pita parsley cumin,mild,vegan,4.5,Crispy chickpea fritters in warm pita with tahini
+Hummus,Mediterranean,chickpeas tahini lemon garlic olive_oil cumin paprika,mild,vegan,4.4,Smooth blended chickpea dip with tahini and lemon
+Shawarma,Mediterranean,chicken garlic yogurt turmeric cumin paprika pita pickles,medium,non-veg,4.6,Spiced rotisserie chicken in warm flatbread
+Greek Salad,Mediterranean,cucumber tomato feta_cheese olive onion oregano olive_oil,mild,vegetarian,4.3,Fresh salad with feta cheese and Kalamata olives
+Lamb Kofta,Mediterranean,lamb onion parsley cumin coriander paprika garlic mint,medium,non-veg,4.5,Spiced ground lamb kebabs with Mediterranean herbs
+Pho,Vietnamese,beef rice_noodles star_anise cinnamon basil bean_sprouts lime hoisin,mild,non-veg,4.7,Aromatic Vietnamese beef noodle soup
+Banh Mi,Vietnamese,pork pate pickled_vegetables cilantro jalapeno baguette soy_sauce,medium,non-veg,4.5,Vietnamese baguette sandwich with pickled veggies
+Spring Rolls,Vietnamese,shrimp rice_paper lettuce mint vermicelli peanut_sauce,mild,non-veg,4.4,Fresh rice paper rolls with shrimp and herbs
+Kimchi Fried Rice,Korean,rice kimchi egg gochujang sesame_oil green_onion pork,medium,non-veg,4.4,Spicy stir-fried rice with fermented kimchi
+Bibimbap,Korean,rice beef vegetables gochujang sesame_oil egg spinach carrot,medium,non-veg,4.6,Mixed rice bowl with vegetables and spicy sauce
